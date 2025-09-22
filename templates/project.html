@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ project[1] }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            padding: 1rem;
+        }
+        .loader {
+            width: 40px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background:
+                radial-gradient(farthest-side, #ED303C 94%, #0000),
+                radial-gradient(farthest-side, #3B8183 94%, #0000),
+                radial-gradient(farthest-side, #FAD089 94%, #0000),
+                radial-gradient(farthest-side, #FF9C5B 94%, #0000),
+                #ED303C;
+            background-size: 105% 105%;
+            background-repeat: no-repeat;
+            animation: l5 2s infinite; 
+            margin: auto;
+        }
+        @keyframes l5 {
+            0%  {background-position: 50% -50px, -40px 50%, 50% calc(100% + 50px), calc(100% + 50px) 50%}
+            20%,
+            25% {background-position: 50% -50px, -50px 50%, 50% calc(100% + 50px), 50% 50%}
+            45%,
+            50% {background-position: 50% -50px, -50px 50%, 50% 50%, 50% 50%}
+            75%,
+            75% {background-position: 50% -50px, 50%  50%, 50% 50%, 50% 50%}
+            95%,
+            100%{background-position: 50%  50%, 50%  50%, 50% 50%, 50% 50%}
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4">
+    <div class="max-w-xl mx-auto bg-white p-8 rounded-xl shadow-md">
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">{{ project[1] }}</h2>
+        <h3 class="text-xl font-semibold text-gray-700 mb-4">Documents</h3>
+        <ul class="space-y-2 mb-4">
+            {% for doc in documents %}
+                <li class="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
+                    <span>{{ doc[1]}}</span>
+                    <div class="flex space-x-2">
+                        <a href="/view/user_{{ User_id }}/project_{{ project[0] }}/{{ doc[1] }}" target="_blank" class="text-blue-600 hover:underline">View</a>
+                        <form method="post" action="/delete_file/{{ doc[0] }}" class="inline">
+                            <button type="submit" class="text-red-600 hover:underline">Delete</button>
+                        </form>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+        <form method="post" enctype="multipart/form-data" action="/projects/{{ project[0] }}/upload" class="mb-4 space-x-2 flex">
+            <input type="file" name="file" class="flex-1 block w-full text-sm text-gray-500
+                file:mr-4 file:py-2 file:px-4
+                file:rounded-full file:border-0
+                file:text-sm file:font-semibold
+                file:bg-blue-50 file:text-blue-700
+                hover:file:bg-blue-100">
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors">Upload</button>
+        </form>
+        <a href="/" class="block text-center text-blue-600 hover:underline mb-4">Back</a>
+
+        <form method="get" action="/projects/{{ project[0] }}/extract">
+            <button type="submit" id="open-popup-btn" class="w-full px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition-colors">
+                Extract Info from Files
+            </button>
+        </form>
+    </div>
+
+    <!-- The overlay for the popup, initially hidden -->
+    <div id="overlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden transition-opacity duration-300"></div>
+
+    <!-- The popup container -->
+    <div id="popup" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-2xl p-8 max-w-xs w-full hidden transition-transform duration-300 ease-in-out text-center">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Wait</h2>
+        <p class="text-gray-600 mb-6">
+            We're getting things ready...
+        </p>
+        <div class="loader"></div>
+    </div>
+
+    <script>
+        // Get the necessary elements from the DOM
+        const openPopupBtn = document.getElementById('open-popup-btn');
+        const popup = document.getElementById('popup');
+        const overlay = document.getElementById('overlay');
+
+        // Function to show the popup
+        function showPopup(event) {
+            // Prevent the default form submission for a moment
+            // The form will still submit, but this gives the popup time to show
+            event.preventDefault();
+            
+            popup.classList.remove('hidden');
+            overlay.classList.remove('hidden');
+            
+            // Re-submit the form after the popup has shown
+            setTimeout(() => {
+                event.target.closest('form').submit();
+            }, 100);
+        }
+
+        // Event listener to handle clicks
+        openPopupBtn.addEventListener('click', showPopup);
+
+        // Optional: Hide the popup when clicking the overlay or pressing 'Escape'
+        function hidePopup() {
+            popup.classList.add('hidden');
+            overlay.classList.add('hidden');
+        }
+
+        // Since this popup is for a form submission, it will automatically hide on page reload.
+        // The following listeners are for good practice but won't be triggered in this specific use case.
+        overlay.addEventListener('click', hidePopup);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !popup.classList.contains('hidden')) {
+                hidePopup();
+            }
+        });
+    </script>
+</body>
+</html>

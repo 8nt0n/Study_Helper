@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --input-padding: 10px;
+            --input-border-radius: 8px;
+            --button-border-radius: 12px;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0; /* Optional: adds a light background color */
+        }
+        
+        .highlight {
+            background-image: linear-gradient(90deg, rgba(0, 115, 247, 1) 41%, rgba(50, 206, 255, 1) 100%);
+            display: inline-block;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: normal;
+        }
+
+        h1 {
+            font-family: 'Inter', sans-serif;
+            font-size: 48px;
+            font-weight: 300;
+        }
+        
+        .main-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+            border: 1px solid black;
+            border-radius: 24px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Adds a subtle shadow */
+            width: 477px;
+            box-sizing: border-box;
+        }
+
+        .form-content {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .form-content label {
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .form-content input[type="text"],
+        .form-content textarea {
+            width: 100%;
+            padding: var(--input-padding);
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: var(--input-border-radius);
+            font-family: 'Inter', sans-serif;
+            box-sizing: border-box; /* Ensures padding doesn't affect the element's width */
+            font-size: 16px;
+        }
+        
+        .form-content textarea {
+            resize: vertical;
+            min-height: 100px; /* Adjust as needed */
+        }
+        
+        .form-buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .form-buttons button,
+        .form-buttons .back-link {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            font-family: 'Inter', sans-serif;
+            border-radius: var(--button-border-radius);
+        }
+        
+        .form-buttons button {
+            color: white;
+            background-color: black;
+            border: none;
+        }
+        
+        .form-buttons .back-link {
+            color: black;
+            background-color: white;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Create a <span class="highlight">Project</span></h1>
+
+    <div class="main-form">
+        
+        <form method="post" class="form-content">
+            <label for="title">Title</label>
+            <input type="text" name="name" id="title" placeholder="🧬 Biology">
+            
+            <label for="description">Description</label>
+            <textarea name="Description" id="description" placeholder="Learn how cells work"></textarea>
+
+            <div class="form-buttons">
+                <a href="/" class="back-link">Back</a>
+                <button type="submit">Create</button>
+            </div>
+        </form>
+
+    </div>
+</body>
+</html>

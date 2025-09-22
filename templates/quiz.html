@@ -1,0 +1,73 @@
+<h2>Quiz</h2>
+
+<div id="quizContainer" style="margin-top:20px;">
+  <!-- Questions will be injected here -->
+</div>
+
+<div id="feedback" style="margin-top:10px; font-weight:bold;"></div>
+
+<button id="nextBtn" style="margin-top:20px; display:none;">Next</button>
+
+<script>
+const questions = {{ quiz.questions|tojson }};
+let current   = 0;   // current question index
+let correct   = 0;   // total correct answers
+
+const container = document.getElementById('quizContainer');
+const feedback  = document.getElementById('feedback');
+const nextBtn   = document.getElementById('nextBtn');
+
+function showQuestion(index){
+    const q = questions[index];
+    feedback.textContent = '';
+    nextBtn.style.display = 'none';
+
+    let html = `<p><strong>Question ${index+1} of ${questions.length}</strong></p>`;
+    html += `<p>${q.question}</p>`;
+    q.options.forEach(opt => {
+        html += `
+          <label style="display:block;margin-bottom:4px;">
+            <input type="radio" name="answer" value="${opt}">
+            ${opt}
+          </label>`;
+    });
+    container.innerHTML = html;
+
+    // Attach listener for each radio option
+    container.querySelectorAll('input[type=radio]').forEach(r => {
+        r.addEventListener('change', () => checkAnswer(q, r.value));
+    });
+}
+
+function checkAnswer(q, selected){
+    if (selected === q.answer){
+        feedback.style.color = 'green';
+        feedback.textContent = '✅ Correct!';
+        correct++;   // increment score
+    } else {
+        feedback.style.color = 'red';
+        feedback.textContent = `❌ Wrong. Correct answer: ${q.answer}`;
+    }
+
+    nextBtn.textContent = (current < questions.length - 1) ? 'Next Question' : 'Finish';
+    nextBtn.style.display = 'inline-block';
+}
+
+nextBtn.addEventListener('click', () => {
+    current++;
+    if (current < questions.length) {
+        showQuestion(current);
+    } else {
+        // Show final score
+        container.innerHTML = `
+            <p><strong>🎉 Quiz Complete!</strong></p>
+            <p>You got <strong>${correct}</strong> out of <strong>${questions.length}</strong> correct.</p>
+        `;
+        feedback.textContent = '';
+        nextBtn.style.display = 'none';
+    }
+});
+
+// Start quiz
+showQuestion(current);
+</script>

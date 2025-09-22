@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.9">
+
+    <!--Inter Font-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+
+    <title>Home</title>
+    <style>
+        body {
+            font-family: Inter;
+            background-color: #ffffff;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .project-item h3 {
+            margin-top: 8px;
+            margin-left: 12px;
+            margin-bottom: 4px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .project-item p {
+            margin: 0px;
+            margin-left: 12px;
+            font-size: 20px;
+            font-weight: normal;
+            color: #919191;
+        }
+
+        .sidebar {
+            width: 435px;
+            height: 96%;
+            align-self: center;
+            margin-left: 20px;
+            background-color: transparent;
+            border: 2px solid #CACACA;
+            border-radius: 20px;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .projects-list {
+            width: 100%;
+            overflow: auto;
+        }
+
+        .project-item {
+            background-color: #f7f7f7;
+            border-radius: 20px;
+            padding: 0px;
+            margin: 10px auto;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: 2px solid #2C2C2C;
+
+            height: 82px;
+            width: 385px;
+            
+        }
+
+        /* Scrollbar track (background) */
+        .projects-list::-webkit-scrollbar {
+            width: 8px;           /* vertical scrollbar width */
+            height: 50%;
+
+        }
+
+        .projects-list::-webkit-scrollbar-thumb {
+            background: #b6b6b6;
+            border-radius: 4px;
+        }
+
+        .project-item:hover {
+            transform: scale(1.02);
+        }
+
+
+        .progress-bar{
+            width: 100%;
+            margin: 0px;
+
+            position: absolute;
+            bottom: 0;
+            left: 0;
+        }
+
+        #progress {
+            position: absolute;
+            right: 6px;
+            bottom: 5px;
+        }
+
+        .content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .header {
+            width: 50%;
+            display: flex;
+            justify-content: flex-end;
+            padding: 20px;
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+
+        .header-button {
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 8px 15px;
+            margin-left: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #4a90e2;
+        }
+
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .welcome-section h1 {
+            font-size: 48px;
+            font-weight: 200;
+            color: #333;
+        }
+
+        /*Little workarround i guess*/
+        .username {
+            background-image: linear-gradient(90deg,rgba(0, 115, 247, 1) 41%, rgba(50, 206, 255, 1) 100%);
+            display: inline-block;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 400;
+        }
+
+        .search-box-container {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        /* Solid border */
+        hr.solid {
+            border-top: 2px solid #D9D9D9;
+            width: 98%;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            font-size: 16px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        #account-wrapper {
+            width: 377px;
+            height: 38px;
+            margin-bottom: 12px;
+
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+
+            font-size: 20px;
+            font-weight: bold;
+            color: #2C2C2C;
+        }
+
+        button {
+            width: 113px;
+            height: 38px;
+            padding: 0px;
+            margin: 0px;
+
+            border: 2px solid #2C2C2C;
+            border-radius: 10px;
+
+            color: #2C2C2C;
+            font-size: 20px;
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition: all 0.25s;
+        }
+
+        button:hover {
+            background-color: #2C2C2C;
+            color: white;
+        }
+
+        #sidebar-heading-container{
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+
+        #sidebar-heading-container button{
+            margin-left: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        
+        <div id="sidebar-heading-container">
+            <h2>Projects</h2>
+            <button onclick="window.location.href = '/projects/create';">+ New</button>
+        </div>
+
+        <div class="projects-list">
+            
+            
+            <hr class="solid" style="margin-bottom: 25px;">
+
+            {% for project in projects %}
+                <div class="project-item" onclick="window.location.href = '/projects/{{ project[0] }}';">
+                    <div style="display: flex; align-items: center;">
+                        <div>
+                            <h3>{{ project[1] }}</h3> <!--Project Title-->
+                            <p>{{ project[2] }}</p> <!--Project Descriptiom-->
+                            <p id="progress">{{ project[4]}}%</p> <!--Project progress-->
+                        </div>
+                    </div>
+                    <img src="{% if project[4] < 50 %}../static/img/Project-Bar:bad.png {% elif project[4] < 80 %}../static/img/Project-Bar:mid.png {% else %}../static/img/Project-Bar:good.png {% endif %}"class="progress-bar">
+                </div>
+            {% endfor %}
+            <!--
+            <div class="project-item">
+                <div style="display: flex; align-items: center;">
+                    <div>
+                        <h3>🧬 Biology</h3>
+                        <p>whats a cell?</p>
+                    </div>
+                </div>
+                <img src="../static/img/Project-Bar:mid.png" class="progress-bar">
+            </div>
+            <div class="project-item">
+                <div style="display: flex; align-items: center;">
+                    <div>
+                        <h3>🇪🇸 Spanish</h3>
+                        <p>using pronouns</p>
+                    </div>
+                </div>
+                <img src="../static/img/Project-Bar:bad.png" class="progress-bar">
+            </div>
+            -->
+        </div>
+        <div class="project-item" style="border: 0px; background-color: #0073F7;">
+            <div style="display: flex; align-items: center;">
+                <div>
+                    <h3 style=" color: white;">🔄 Mixed</h3>
+                    <p style=" color: white;">all of your Projects Mixed up</p>
+                </div>
+            </div>
+        </div>
+
+        <hr class="solid" style="margin-bottom: 10px;">
+
+        <div id="account-wrapper">
+            <p>👨🏻‍💼 {{Username}}</p>
+            <button onclick="window.location.href = '/logout';">Log Out</button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="header">
+            <img src="../static/img/logo.png" alt="logo" height="55">
+        </div>
+        <div class="welcome-section">
+            <h1>Hello, <span class="username">{{Username}}</span></h1>
+        </div>
+        <div class="search-box-container">
+            <input type="text" class="search-box" placeholder="Ask anything about any project">
+        </div>
+    </div>
+</body>
+</html>

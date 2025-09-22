@@ -1,0 +1,22 @@
+<style>
+    /* Solid border */
+        hr.solid {
+            border-top: 2px solid #D9D9D9;
+            width: 98%;
+        }
+</style>
+
+<h2>Projects for {{ session.username }}</h2>
+<ul>
+{% for project in projects %}
+    <li>
+        <a href="/projects/{{ project[0] }}">Title: {{ project[1] }}</a>
+        <p>Description: {{ project[2] }}</p>
+        <hr class="solid" style="margin-bottom: 25px;">
+    </li>
+{% else %}
+    <li>No projects yet</li>
+{% endfor %}
+</ul>
+<a href="/projects/create">Create New Project</a>
+<a href="/logout">Logout</a>
