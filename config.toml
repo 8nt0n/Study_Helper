@@ -1,0 +1,3 @@
+[Api_keys]
+Gemini = "YOUR_API_KEY"
+OpenAi = "YOUR_API_KEY"
