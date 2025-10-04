@@ -54,13 +54,14 @@
         .projects-list {
             width: 100%;
             overflow: auto;
+            height: 100%;
         }
 
         .project-item {
             background-color: #f7f7f7;
-            border-radius: 20px;
+            border-radius: 20px 20px 0px 0px;
             padding: 0px;
-            margin: 10px auto;
+            margin: 10px auto 0px auto; /*https://www.w3schools.com/css/css_margin.asp saved my ass*/
             position: relative;
             overflow: hidden;
             cursor: pointer;
@@ -70,6 +71,23 @@
             height: 82px;
             width: 385px;
             
+        }
+
+        /*I placed it underneath the project item style block bc the delete form is rendered underneath each project card too :) */
+        .delete-project {
+            background-color: #f7f7f7;
+            color: red;
+            border-radius: 0px 0px 20px 20px;
+            padding: 0px;
+            margin: -2px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: 2px solid #2C2C2C;
+
+            height: 35px;
+            width: 389px;
         }
 
         /* Scrollbar track (background) */
@@ -82,10 +100,6 @@
         .projects-list::-webkit-scrollbar-thumb {
             background: #b6b6b6;
             border-radius: 4px;
-        }
-
-        .project-item:hover {
-            transform: scale(1.02);
         }
 
 
@@ -166,7 +180,7 @@
         /* Solid border */
         hr.solid {
             border-top: 2px solid #D9D9D9;
-            width: 98%;
+            width: 95%;
         }
 
         .search-box {
@@ -224,6 +238,8 @@
             flex-direction: row;
             align-items: center;
             justify-content: flex-start;
+            width: 100%;
+            margin-left: 25px;
         }
 
 
@@ -236,14 +252,13 @@
     <div class="sidebar">
         
         <div id="sidebar-heading-container">
-            <h2>Projects</h2>
+            <h2>✍️ Projects</h2>
             <button onclick="window.location.href = '/projects/create';">+ New</button>
         </div>
 
+        <hr class="solid" style="margin-bottom: 25px;">
+
         <div class="projects-list">
-            
-            
-            <hr class="solid" style="margin-bottom: 25px;">
 
             {% for project in projects %}
                 <div class="project-item" onclick="window.location.href = '/projects/{{ project[0] }}';">
@@ -251,11 +266,18 @@
                         <div>
                             <h3>{{ project[1] }}</h3> <!--Project Title-->
                             <p>{{ project[2] }}</p> <!--Project Descriptiom-->
+                            <!--progress bar-->
                             <p id="progress">{{ project[4]}}%</p> <!--Project progress-->
                         </div>
                     </div>
                     <img src="{% if project[4] < 50 %}../static/img/Project-Bar:bad.png {% elif project[4] < 80 %}../static/img/Project-Bar:mid.png {% else %}../static/img/Project-Bar:good.png {% endif %}"class="progress-bar">
                 </div>
+                
+                <!--Delete Button-->
+                <form method="post" action="{{ url_for('delete_project', project_id=project[0]) }}" style="width: 100%; display: flex; align-items: center; justify-content: center;"
+                    onsubmit="return confirm('Are you sure you want to delete this project? This cannot be undone.');">
+                <button type="submit" style="color: red;" class="delete-project">🗑️ Delete</button>
+                </form>
             {% endfor %}
             <!--
             <div class="project-item">
@@ -277,14 +299,6 @@
                 <img src="../static/img/Project-Bar:bad.png" class="progress-bar">
             </div>
             -->
-        </div>
-        <div class="project-item" style="border: 0px; background-color: #0073F7;">
-            <div style="display: flex; align-items: center;">
-                <div>
-                    <h3 style=" color: white;">🔄 Mixed</h3>
-                    <p style=" color: white;">all of your Projects Mixed up</p>
-                </div>
-            </div>
         </div>
 
         <hr class="solid" style="margin-bottom: 10px;">

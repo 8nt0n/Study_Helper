@@ -8,6 +8,7 @@ from markdown2 import markdown
 import json
 import os
 from functools import wraps
+import shutil
 
 import re
 
@@ -21,8 +22,8 @@ with open("config.toml", "rb") as f:   # Must be opened in binary mode
     config = tomllib.load(f)
 
 # Access variables
-print(config["Api_keys"]["Gemini"])   # your Gemini API KEY
-print(config["Api_keys"]["OpenAi"])   # your Open Ai API KEY
+print(config["Api_keys"]["Gemini"])   # your Gemini API KEY (yes your... dear user?)
+print(config["Api_keys"]["OpenAi"])   #               -- || --
 
 
 # --- Flask setup ---
@@ -68,7 +69,7 @@ def init_db():
 #                                     Index      
 # ===============================================================================
 
-# no @login_required bc we need 1 for each case
+# no @login_required bc we need 1 for each case (ifykyk)
 @app.route("/")
 def home():
     # if were logged in
@@ -79,7 +80,7 @@ def home():
         projects = db.execute("SELECT * FROM projects WHERE user_id=?", (user_id,)).fetchall()
         # render the dashboard
         return render_template("index.html", Username=session['username'], projects=projects)
-    #TODO: else render a generic site
+    #TODO: else render a generic site (wow it looks stunning 🥹)
     return "<a href='/login'>Login</a> | <a href='/register'>Register</a>"
 
 
@@ -108,7 +109,7 @@ def register():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    # check if user exists
+    # check if user exists (because in order to login you should have a account to log into you know?)
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
@@ -130,6 +131,7 @@ def logout():
     session.clear()
     return redirect(url_for("home"))
 
+#moooom... im a senior dev
 @app.route("/forgot_password")
 def forgot_password():
     return render_template("forgot_password.html")
@@ -140,7 +142,7 @@ def forgot_password():
 #                                       Projects    
 # ===============================================================================
 
-# just for debugging purposes, not for normal users
+# just for debugging purposes, not for normal users, i will totally remember to remove this in prod
 @app.route("/projects")
 @login_required
 def projects():
@@ -220,6 +222,7 @@ def view_project(project_id):
 
 
         #TODO: Create videos for each subtopic of the plan
+        # hehe this todo is in here for like 2 months but the site works regardless
 
         print(project)
         # load everything into the plan
@@ -255,7 +258,7 @@ def upload_file(project_id):
         return redirect(request.url)
 
     filename = secure_filename(file.filename)
-    # Create directories
+    # Create directories (pleeeaase linux pleaase)
     user_folder = os.path.join(app.config["UPLOAD_FOLDER"], f"user_{user_id}")
     project_folder = os.path.join(user_folder, f"project_{project_id}")
     os.makedirs(project_folder, exist_ok=True)
@@ -274,7 +277,7 @@ def extract(project_id):
     db = get_db()
     user_id = session["user_id"]
 
-    #--------------- Write a analysis for all the documents with gemini (thx for the free api key guys) ---------------#
+    #--------------- Write a analysis for all the documents with gemini (thx for the free api key guys google rocks and stuff) ---------------#
 
     # Make sure project belongs to the logged-in user
     project = db.execute(
@@ -303,7 +306,7 @@ def extract(project_id):
 
     gemini_text = None
     if existing_files:
-        # Send multimodal request to Gemini
+        # Send multimodal request to Gemini (woah the guy who wrote that helper file must be so smart)
         response = ai.prompt_gemini_multimodal(text_prompt, files=existing_files)
 
         if response and "candidates" in response:
@@ -313,7 +316,7 @@ def extract(project_id):
             extracted_folder = os.path.join(project_folder, "extracted")
             os.makedirs(extracted_folder, exist_ok=True)
 
-            # Save Gemini response to a file
+            # Save the Ai wisdom to a file
             output_file = os.path.join(extracted_folder, "analysis.txt")
             with open(output_file, "w") as f:
                 f.write(gemini_text)
@@ -324,9 +327,11 @@ def extract(project_id):
 
 
     #--------------- make chapters based of of the extracted content ---------------#
+    
+    # am i a prompt engineer or am i a prompt engineer
     Prompt = 'You are an AI tutor. I will give you extracted notes from a collection of documents and images. Your job is to design a structured learning plan that teaches everything step by step. Requirements for your output: Return ONLY valid JSON (no explanations, no markdown, no extra text). The JSON must follow this structure: { "chapters": [ { "title": "Chapter Title", "summary": "A short explanation of the key ideas in this chapter, no sentences, just keywords.", "subtopics": [ { "title": "Subtopic 1 Title", "description": "A brief explanation of the subtopic." }, { "title": "Subtopic 2 Title", "description": "A brief explanation of the subtopic." }, { "title": "Subtopic 3 Title", "description": "A brief explanation of the subtopic." } ] } ] } Guidelines: Break the material into 3–6 logical chapters. Each chapter should cover a coherent theme or concept. Each chapter must contain exactly 3 subtopics, with titles and brief descriptions. Titles should be short, clear, and student-friendly. Summaries should be clear enough that a beginner can understand the flow. Answer in the language the analysis is in. Here is the extracted analysis to structure into chapters: <<<ANALYSIS>>>'
     
-    # find the file
+    # find the file (hopefully.... please work this time)
     file_path = os.path.join(
         "uploads",
         f"user_{session['user_id']}",
@@ -379,6 +384,40 @@ def extract(project_id):
         plan_data = json.load(f)
 
     return redirect(url_for('view_project', project_id=project_id))
+
+
+@app.route("/projects/<int:project_id>/delete", methods=["POST"])
+@login_required
+def delete_project(project_id):
+    db = get_db()
+    user_id = session["user_id"]
+
+    # Ensure the project belongs to this user
+    project = db.execute(
+        "SELECT * FROM projects WHERE id=? AND user_id=?",
+        (project_id, user_id)
+    ).fetchone()
+    if not project:
+        abort(403)
+
+    # 1) Remove all associated documents from DB
+    db.execute("DELETE FROM documents WHERE project_id=?", (project_id,))
+
+    # 2) Remove project itself from DB
+    db.execute("DELETE FROM projects WHERE id=?", (project_id,))
+    db.commit()
+
+    # 3) Remove project folder from filesystem
+    project_folder = os.path.join(
+        app.config["UPLOAD_FOLDER"],
+        f"user_{user_id}",
+        f"project_{project_id}"
+    )
+    if os.path.exists(project_folder):
+        shutil.rmtree(project_folder, ignore_errors=True)
+
+    flash("Project deleted successfully.", "success")
+    return redirect(url_for("home"))
 
 
 # ===============================================================================
@@ -578,11 +617,11 @@ def extract_json(text: str) -> str:
     return text.strip()
 
 
-# ---------- helpers (place near top / before routes) ----------
+# ---------- Bro im the author of clean code at this point, look at this elite ball knowledge, using functions to reuse similar code ----------
 def create_video_for_subtopic(user_id, project_id, chapter_idx, sub_idx, title, description):
     """Create video MP4 and return the viewer URL (url_for view_file)."""
     uploads_root = app.config['UPLOAD_FOLDER']
-    # Read analysis
+    # Read analysis or something (please work this time)
     analysis_path = os.path.join(uploads_root, f"user_{user_id}", f"project_{project_id}", "extracted", "analysis.txt")
     analysis_text = ""
     if os.path.isfile(analysis_path):
@@ -593,10 +632,10 @@ def create_video_for_subtopic(user_id, project_id, chapter_idx, sub_idx, title, 
     os.makedirs(videos_folder, exist_ok=True)
     output_abs = os.path.join(videos_folder, f"{chapter_idx}_{sub_idx}.mp4")
 
-    # call your existing video creation function
+    # call the video creation function
     video.make_video(title, description, analysis_text, output_abs)
 
-    # viewer path expected by view_file (starts with 'uploads/...')
+    # do something (hopefully)?
     video_relpath = f"uploads/user_{user_id}/project_{project_id}/videos/{chapter_idx}_{sub_idx}.mp4"
     return url_for('view_file', filepath=video_relpath)
 
@@ -613,45 +652,47 @@ def create_notes_for_subtopic(user_id, project_id, chapter_idx, sub_idx, title, 
     os.makedirs(notes_folder, exist_ok=True)
     output_abs = os.path.join(notes_folder, f"{chapter_idx}_{sub_idx}.md")
 
+    # this will (mathematically) absoultely fail bc gemini fucks it up sometimes but empirically it works about 20% of the time
+    # Update wow i should totally pack this in a 5x loop bc 5x20% is 100%, don’t forget to fix this tomorrow...
     prompt = f"""
-Create a concise study cheat sheet in Markdown for the subtopic:
-"{title}"
+                Create a concise study cheat sheet in Markdown for the subtopic:
+                "{title}"
 
-Use the following analysis as background:
-{analysis_text}
+                Use the following analysis as background:
+                {analysis_text}
 
-Follow this exact Markdown structure:
-# {title}
-A short 1–2 sentence overview of the subtopic.
+                Follow this exact Markdown structure:
+                # {title}
+                A short 1–2 sentence overview of the subtopic.
 
----
+                ---
 
-## 💡 Key Concepts
-- Bullet point 1
-- Bullet point 2
-- Bullet point 3
+                ## 💡 Key Concepts
+                - Bullet point 1
+                - Bullet point 2
+                - Bullet point 3
 
----
+                ---
 
-## 🏷️ Important Terms
-- **Term 1**: Short definition
-- **Term 2**: Short definition
-- **Term 3**: Short definition
+                ## 🏷️ Important Terms
+                - **Term 1**: Short definition
+                - **Term 2**: Short definition
+                - **Term 3**: Short definition
 
----
+                ---
 
-## ⚡ Quick Facts
-- Fact 1
-- Fact 2
-- Fact 3
+                ## ⚡ Quick Facts
+                - Fact 1
+                - Fact 2
+                - Fact 3
 
----
+                ---
 
-Guidelines:
-- Keep language clear and beginner-friendly.
-- Use proper Markdown headings (#, ##) exactly as shown.
-- Output ONLY valid Markdown (no extra commentary).
-"""
+                Guidelines:
+                - Keep language clear and beginner-friendly.
+                - Use proper Markdown headings (#, ##) exactly as shown.
+                - Output ONLY valid Markdown (no extra commentary).
+            """
     notes_response = ai.prompt_gemini(google_ai_studio_key, prompt)
     # write response (you already have extract_json for JSON; not needed for md)
     with open(output_abs, "w", encoding="utf-8") as f:

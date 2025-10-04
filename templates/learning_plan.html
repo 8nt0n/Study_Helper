@@ -114,6 +114,10 @@
         </ul>
     </li>
 {% endfor %}
+<form method="post" action="{{ url_for('delete_project', project_id=project[0]) }}"
+      onsubmit="return confirm('Are you sure you want to delete this project? This cannot be undone.');">
+  <button type="submit" style="color: red;">🗑️ Delete Project</button>
+</form>
 </ul>
 <script>
 /* make these global so functions defined outside DOMContentLoaded can use them */
