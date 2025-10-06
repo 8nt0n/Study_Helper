@@ -102,7 +102,7 @@ def register():
             db.commit()
             return redirect(url_for("login"))
         except sqlite3.IntegrityError:
-            return "Username already exists!"
+            return "Username already exists! Chill with that username bro 😤"
         
     else:
         return render_template("register.html")
@@ -162,7 +162,7 @@ def create_project():
         user_id = session["user_id"]
         db = get_db()
         
-        # DB Schema
+        #---------- DB Schema ----------#
         #
         # CREATE TABLE projects (
         #     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -187,7 +187,7 @@ def create_project():
 @app.route("/projects/<int:project_id>")
 @login_required
 def view_project(project_id):
-    # if we already extracted the information from the uploaded files
+    # if we already extracted the information from the uploaded files 
     file_path = os.path.join(
         "uploads",
         f"user_{session['user_id']}",
@@ -200,7 +200,7 @@ def view_project(project_id):
     if os.path.exists(file_path):
         db = get_db()
         user_id = str(session["user_id"])
-        # get info abt our project
+        # get info abt our project (our?)
         project = db.execute(
             "SELECT * FROM projects WHERE id=? AND user_id=?",
             (project_id, user_id)
@@ -254,7 +254,7 @@ def upload_file(project_id):
         return redirect(request.url)
     file = request.files["file"]
     if file.filename == "":
-        flash("No selected file")
+        flash("No selected file") # c’mon pick a file 😭
         return redirect(request.url)
 
     filename = secure_filename(file.filename)
@@ -328,8 +328,8 @@ def extract(project_id):
 
     #--------------- make chapters based of of the extracted content ---------------#
     
-    # am i a prompt engineer or am i a prompt engineer
-    Prompt = 'You are an AI tutor. I will give you extracted notes from a collection of documents and images. Your job is to design a structured learning plan that teaches everything step by step. Requirements for your output: Return ONLY valid JSON (no explanations, no markdown, no extra text). The JSON must follow this structure: { "chapters": [ { "title": "Chapter Title", "summary": "A short explanation of the key ideas in this chapter, no sentences, just keywords.", "subtopics": [ { "title": "Subtopic 1 Title", "description": "A brief explanation of the subtopic." }, { "title": "Subtopic 2 Title", "description": "A brief explanation of the subtopic." }, { "title": "Subtopic 3 Title", "description": "A brief explanation of the subtopic." } ] } ] } Guidelines: Break the material into 3–6 logical chapters. Each chapter should cover a coherent theme or concept. Each chapter must contain exactly 3 subtopics, with titles and brief descriptions. Titles should be short, clear, and student-friendly. Summaries should be clear enough that a beginner can understand the flow. Answer in the language the analysis is in. Here is the extracted analysis to structure into chapters: <<<ANALYSIS>>>'
+    # am i a prompt engineer or am i a prompt engineer!?
+    Prompt = 'You are an AI tutor. I will give you extracted notes from a collection of documents and images. Your job is to design a structured learning plan that teaches everything step by step. Requirements for your output: Return ONLY valid JSON (no explanations, no markdown, no extra text). The JSON must follow this structure: { "chapters": [ { "title": "Chapter Title", "summary": "A short explanation of the key ideas in this chapter, no sentences, max 5 words.", "subtopics": [ { "title": "Subtopic 1 Title", "description": "A brief explanation of the subtopic, max 5 words" }, { "title": "Subtopic 2 Title", "description": "A brief explanation of the subtopic, max 5 words" }, { "title": "Subtopic 3 Title", "description": "A brief explanation of the subtopic, max 5 words" } ] } ] } Guidelines: Break the material into 3–6 logical chapters. Each chapter should cover a coherent theme or concept. Each chapter must contain exactly 3 subtopics, with titles and brief descriptions. Titles should be short (2 words max), clear, and student-friendly. Summaries should be clear enough that a beginner can understand the flow. Answer in the language the analysis is in. Here is the extracted analysis to structure into chapters: <<<ANALYSIS>>>'
     
     # find the file (hopefully.... please work this time)
     file_path = os.path.join(
@@ -400,14 +400,14 @@ def delete_project(project_id):
     if not project:
         abort(403)
 
-    # 1) Remove all associated documents from DB
+    # 1.) Remove all associated documents from DB
     db.execute("DELETE FROM documents WHERE project_id=?", (project_id,))
 
-    # 2) Remove project itself from DB
+    # 2.) Remove project itself from DB
     db.execute("DELETE FROM projects WHERE id=?", (project_id,))
     db.commit()
 
-    # 3) Remove project folder from filesystem
+    # 3.) Remove project folder from filesystem
     project_folder = os.path.join(
         app.config["UPLOAD_FOLDER"],
         f"user_{user_id}",
@@ -421,7 +421,7 @@ def delete_project(project_id):
 
 
 # ===============================================================================
-#                            File Handling
+#                               File Handling
 # ===============================================================================
 @app.route('/view/<path:filepath>')
 @login_required
@@ -619,7 +619,6 @@ def extract_json(text: str) -> str:
 
 # ---------- Bro im the author of clean code at this point, look at this elite ball knowledge, using functions to reuse similar code ----------
 def create_video_for_subtopic(user_id, project_id, chapter_idx, sub_idx, title, description):
-    """Create video MP4 and return the viewer URL (url_for view_file)."""
     uploads_root = app.config['UPLOAD_FOLDER']
     # Read analysis or something (please work this time)
     analysis_path = os.path.join(uploads_root, f"user_{user_id}", f"project_{project_id}", "extracted", "analysis.txt")
@@ -632,15 +631,12 @@ def create_video_for_subtopic(user_id, project_id, chapter_idx, sub_idx, title, 
     os.makedirs(videos_folder, exist_ok=True)
     output_abs = os.path.join(videos_folder, f"{chapter_idx}_{sub_idx}.mp4")
 
-    # call the video creation function
     video.make_video(title, description, analysis_text, output_abs)
 
-    # do something (hopefully)?
     video_relpath = f"uploads/user_{user_id}/project_{project_id}/videos/{chapter_idx}_{sub_idx}.mp4"
     return url_for('view_file', filepath=video_relpath)
 
 def create_notes_for_subtopic(user_id, project_id, chapter_idx, sub_idx, title, description):
-    """Create markdown notes and return viewer url (url_for view_markdown)."""
     uploads_root = app.config['UPLOAD_FOLDER']
     analysis_path = os.path.join(uploads_root, f"user_{user_id}", f"project_{project_id}", "extracted", "analysis.txt")
     analysis_text = ""
@@ -694,7 +690,7 @@ def create_notes_for_subtopic(user_id, project_id, chapter_idx, sub_idx, title, 
                 - Output ONLY valid Markdown (no extra commentary).
             """
     notes_response = ai.prompt_gemini(google_ai_studio_key, prompt)
-    # write response (you already have extract_json for JSON; not needed for md)
+    # write response (you already have extract_json for JSON dummy; not needed for md)
     with open(output_abs, "w", encoding="utf-8") as f:
         f.write(notes_response if isinstance(notes_response, str) else str(notes_response))
 
@@ -702,7 +698,6 @@ def create_notes_for_subtopic(user_id, project_id, chapter_idx, sub_idx, title, 
     return url_for('view_markdown', filepath=notes_relpath)
 
 def create_quiz_for_subtopic(user_id, project_id, chapter_idx, sub_idx, title, description):
-    """Create quiz JSON file and return viewer url (url_for view_quiz)."""
     uploads_root = app.config['UPLOAD_FOLDER']
     analysis_path = os.path.join(uploads_root, f"user_{user_id}", f"project_{project_id}", "extracted", "analysis.txt")
     analysis_text = ""
@@ -715,7 +710,7 @@ def create_quiz_for_subtopic(user_id, project_id, chapter_idx, sub_idx, title, d
     output_abs = os.path.join(quizzes_folder, f"{chapter_idx}_{sub_idx}.json")
 
     prompt = f"""
-    Create a 5-question multiple-choice quiz in valid JSON for the subtopic:
+    Create a 10-question multiple-choice quiz in valid JSON for the subtopic:
     "{title}"
 
     Use the following analysis as background:
@@ -736,7 +731,7 @@ def create_quiz_for_subtopic(user_id, project_id, chapter_idx, sub_idx, title, d
         # fallback: try to save raw as error for debugging
         raise RuntimeError(f"Invalid JSON from model: {e}\nRaw response start: {cleaned[:300]}")
 
-    # normalize
+    # normalize ig
     if "quiz" in quiz_data and "questions" not in quiz_data:
         quiz_data = {"questions": quiz_data["quiz"]}
 
@@ -747,7 +742,6 @@ def create_quiz_for_subtopic(user_id, project_id, chapter_idx, sub_idx, title, d
     return url_for('view_quiz', filepath=quiz_relpath)
 
 
-# ---------- update existing form routes to use helpers (keeps backward compatibility) ----------
 @app.route("/projects/<int:project_id>/make_video", methods=["POST"])
 @login_required
 def make_subtopic_video(project_id):
@@ -762,7 +756,7 @@ def make_subtopic_video(project_id):
     title       = request.form.get("title")
     description = request.form.get("description")
 
-    # call helper (this may take some time)
+    # call helper (this may take some time Update: actually this may take a lot of time)
     create_video_for_subtopic(user_id, project_id, chapter_idx, sub_idx, title, description)
     flash("Video created successfully!", "success")
     return redirect(url_for("view_project", project_id=project_id))

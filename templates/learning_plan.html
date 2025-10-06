@@ -1,231 +1,393 @@
-<!-- Notes Modal -->
-<div id="notesModal" class="modal" style="
-    display:none; position:fixed; z-index:1000;
-    left:0; top:0; width:100%; height:100%;
-    background-color: rgba(0,0,0,0.7);">
-  <div style="
-      position:relative;
-      margin:5% auto;
-      background:#fff;
-      padding:10px;
-      width:80%;
-      max-width:900px;
-      border-radius:10px;">
-    <span id="closeNotes" style="
-        position:absolute; right:15px; top:10px;
-        font-size:28px; font-weight:bold; cursor:pointer;">
-      &times;
-    </span>
-    <iframe id="notesFrame"
-            src=""
-            style="width:100%; height:500px; border:none; border-radius:8px;"
-            allowfullscreen>
-    </iframe>
+<head>
+  <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.9">
+
+    <!--Inter Font-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+
+  <style>
+    body{
+      display: flex;
+      align-items: center;
+      width: 100%;
+      margin: 0px;
+      padding: 0px;
+      flex-direction: column;
+    }
+
+    p{
+      font-family: Inter;
+    }
+
+    .page_title{
+      text-align: center;
+      justify-self: center;
+      font-family: Inter;
+      font-weight: 300;
+      font-size: 48px;
+      margin-bottom: 57px;
+      margin-top: 95px;
+    }
+
+    .project_title{
+          background-image: linear-gradient(90deg,rgba(0, 115, 247, 1) 41%, rgba(50, 206, 255, 1) 100%);
+          display: inline-block;
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          font-weight: 500;
+    }
+    .emoji {
+      background: none;
+      color: black;
+      font-size: 40px;
+    }
+    .chapter-wrapper{
+      /*Bro ive done that shit in figma and im gonna use the exact measurements...*/
+      width: 477px;
+      height: 691px;
+
+      margin-bottom: 114px;
+
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      
+    }
+    .top-wrapper{
+      width: 477px;
+      height: 99px;
+
+      background-color: white;
+      border-radius: 24px;
+      box-shadow: inset 0 0 0 1px rgb(0, 0, 0);
+
+      display: flex;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .topic-header{
+      font-weight: 600;
+      font-size: 24px;
+      margin-top: 10px;
+      margin-left: 25px;
+      margin-bottom: 4px;
+    }
+    .chapter-div {
+      opacity: 1;
+      width: 388px;
+      height: 118px;
+      background-color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: start;
+      align-items: start;
+      box-shadow: inset 0 0 0 1px rgb(0, 0, 0);
+      border-radius: 15px; /* because square corners are for losers */
+      overflow: hidden;
+      align-self: center;
+      position: relative;
+      z-index: 10; /*bro chat gpt is fixing bugs like a jr dev fr fr 😭😭 (he said increase it to 999 i cant...) */
+      cursor: pointer;
+      transition: all 0.5s;
+    }
+
+    .button-div img {
+      display: none; 
+      width: 118px;
+      height: 118px;
+    }
+
+    .chapter-div:hover .button-div img {
+      display: block;
+      background-color: white;
+    }
+
+
+    .chapter-div::-webkit-scrollbar {
+      display: none;
+    }
+
+    .button-div{
+      background-color: transparent;
+      opacity: 1;
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      width: 388px;
+      height: 118px;
+      
+      z-index: 1;
+      transition: all 0.5s;
+    }
+    
+    .button-div:hover{
+      background-color: white;
+    }
+
+    .topic-description{
+      font-weight: 500;
+      margin: 0px;
+      margin-left: 25px;
+      color: #7c7c7c;
+      font-size: 15px;
+    }
+
+  </style>
+</head>
+
+<body>
+  
+  <!-- Notes Modal -->
+  <div id="notesModal" class="modal" style="
+      display:none; position:fixed; z-index:1000;
+      left:0; top:0; width:100%; height:100%;
+      background-color: rgba(0,0,0,0.7);">
+    <div style="
+        position:relative;
+        margin:5% auto;
+        background:#fff;
+        padding:10px;
+        width:80%;
+        max-width:900px;
+        border-radius:10px;">
+      <span id="closeNotes" style="
+          position:absolute; right:15px; top:10px;
+          font-size:28px; font-weight:bold; cursor:pointer;">
+        &times;
+      </span>
+      <iframe id="notesFrame"
+              src=""
+              style="width:100%; height:500px; border:none; border-radius:8px;"
+              allowfullscreen>
+      </iframe>
+    </div>
   </div>
-</div>
 
 
-<!-- Popup modal -->
-<div id="videoModal" class="modal" style="
-    display:none;
-    position:fixed;
-    z-index:1000;
-    left:0; top:0;
-    width:100%; height:100%;
-    background-color: rgba(0,0,0,0.7);
+  <!-- Popup modal -->
+  <div id="videoModal" class="modal" style="
+      display:none;
+      position:fixed;
+      z-index:1000;
+      left:0; top:0;
+      width:100%; height:100%;
+      background-color: rgba(0,0,0,0.7);
+      ">
+    <div style="
+        position:relative;
+        margin:5% auto;
+        background:#fff;
+        padding:10px;
+        width:80%;
+        max-width:1000px;
+        border-radius:10px;
     ">
-  <div style="
-      position:relative;
-      margin:5% auto;
-      background:#fff;
-      padding:10px;
-      width:80%;
-      max-width:1000px;
-      border-radius:10px;
-  ">
-    <span id="closeModal" style="
-        position:absolute;
-        right:15px;
-        top:10px;
-        font-size:28px;
-        font-weight:bold;
-        cursor:pointer;
-        color: white;
-    ">&times;</span>
+      <span id="closeModal" style="
+          position:absolute;
+          right:15px;
+          top:10px;
+          font-size:28px;
+          font-weight:bold;
+          cursor:pointer;
+          color: white;
+      ">&times;</span>
 
-    <!-- We’ll inject the iframe src dynamically -->
-    <iframe id="videoFrame"
-            src=""
-            frameborder="0"
-            allow="autoplay; fullscreen"
-            style="width:100%; height:500px; border-radius:8px;"
-            allowfullscreen>
-    </iframe>
+      <!-- We’ll inject the iframe src dynamically (omg i saved so much time by typing src instead of source im gonna cure cancer now) -->
+      <iframe id="videoFrame"
+              src=""
+              frameborder="0"
+              allow="autoplay; fullscreen"
+              style="width:100%; height:500px; border-radius:8px;"
+              allowfullscreen>
+      </iframe>
+    </div>
   </div>
-</div>
 
-<h2>Learn {{ project[1] }}</h2>
-<ul>
-{% for chapter in plan['chapters'] %}
-    {% set chapter_idx = loop.index0 %}
-    <li>
-        <strong>{{ chapter['title'] }}</strong><br>
-        {{ chapter['summary'] }}
-        <ul>
+  <img src="../static/img/logo.png" alt="logo" style="width: 200px; position: absolute; top: 15px; right: 15px;">
+
+  <h2 class="page_title">Learn  <span class="project_title">{{ project[1] }}</span></h2>
+  <ul>
+  {% for chapter in plan['chapters'] %}
+      {% set chapter_idx = loop.index0 %}
+      
+      <!--wrapper div-->
+      <div class="chapter-wrapper">
+        <!--top div-->
+        <div class="top-wrapper">
+          <p class="topic-header">{{ chapter['title'] }}</p>
+          <!-- <p>{{ chapter['summary'] }}</p> -->
+        </div>
+        
+        <!--bottom div-->
+        <div>
             {% for subtopic in chapter['subtopics'] %}
-                {% set sub_idx = loop.index0 %}
-                <li>
-                    <b>{{ subtopic['title'] }}</b>: {{ subtopic['description'] }}
+                  {% set sub_idx = loop.index0 %}
+                      <div style="margin-bottom: 30px;" class="chapter-div">
+                          <p class="topic-header">{{ subtopic['title'] }}</p>
+                          <p class="topic-description">{{ subtopic['description'] }}</p>
 
-                    <div style="margin-bottom: 30px;">
-                        <div style="margin-bottom: 30px;">
-                            <!-- Unified resource buttons: use data- attributes not inline onclick -->
-                            <button class="resource-btn" 
-                                    data-type="video"
-                                    data-chapter="{{ chapter_idx }}"
-                                    data-sub="{{ sub_idx }}"
-                                    data-title="{{ subtopic['title']|e }}"
-                                    data-description="{{ subtopic['description']|e }}">
-                            ▶️ Video
-                            </button>
 
-                            <button class="resource-btn" 
-                                    data-type="notes"
-                                    data-chapter="{{ chapter_idx }}"
-                                    data-sub="{{ sub_idx }}"
-                                    data-title="{{ subtopic['title']|e }}"
-                                    data-description="{{ subtopic['description']|e }}">
-                            📄 Notes
-                            </button>
+                          <div class="button-div" style="margin-bottom: 30px;">
 
-                            <button class="resource-btn" 
-                                    data-type="quiz"
-                                    data-chapter="{{ chapter_idx }}"
-                                    data-sub="{{ sub_idx }}"
-                                    data-title="{{ subtopic['title']|e }}"
-                                    data-description="{{ subtopic['description']|e }}">
-                            ❓ Quiz
-                            </button>
-                        </div>
+                              <img src="../static/img/Video-button.png" alt="Video"
+                                class="resource-btn" 
+                                data-type="video"
+                                data-chapter="{{ chapter_idx }}"
+                                data-sub="{{ sub_idx }}"
+                                data-title="{{ subtopic['title']|e }}"
+                                data-description="{{ subtopic['description']|e }}">
 
-                    </div>
-                </li>
-            {% endfor %}
-        </ul>
-    </li>
-{% endfor %}
-<form method="post" action="{{ url_for('delete_project', project_id=project[0]) }}"
-      onsubmit="return confirm('Are you sure you want to delete this project? This cannot be undone.');">
-  <button type="submit" style="color: red;">🗑️ Delete Project</button>
-</form>
-</ul>
-<script>
-/* make these global so functions defined outside DOMContentLoaded can use them */
-window.projectId = {{ project[0]|tojson }};
-window.userId = {{ User_id|tojson }};
+                              <img src="../static/img/Notes-Button.png" alt="Notes"
+                                      class="resource-btn" 
+                                      data-type="notes"
+                                      data-chapter="{{ chapter_idx }}"
+                                      data-sub="{{ sub_idx }}"
+                                      data-title="{{ subtopic['title']|e }}"
+                                      data-description="{{ subtopic['description']|e }}">
+                              
+                              <img src="../static/img/Quizz-Button.png" alt="Notes"
+                                      class="resource-btn" 
+                                      data-type="quiz"
+                                      data-chapter="{{ chapter_idx }}"
+                                      data-sub="{{ sub_idx }}"
+                                      data-title="{{ subtopic['title']|e }}"
+                                      data-description="{{ subtopic['description']|e }}">
+                          </div>
 
-document.addEventListener('DOMContentLoaded', () => {
-  // Attach listeners to data-* buttons
-  document.querySelectorAll('.resource-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const type = btn.dataset.type;
-      const chapter_idx = btn.dataset.chapter;
-      const sub_idx = btn.dataset.sub;
-      const title = btn.dataset.title;
-      const description = btn.dataset.description;
-      console.log("Button clicked", {type, chapter_idx, sub_idx, title});
-      handleResource(type, chapter_idx, sub_idx, title, description, btn);
+                      </div>
+              {% endfor %}
+          </div>
+      </div>
+  {% endfor %}
+
+
+  <form method="post" action="{{ url_for('delete_project', project_id=project[0]) }}"
+        onsubmit="return confirm('Are you sure you want to delete this project? This cannot be undone.');">
+    <button type="submit" style="color: red;">🗑️ Delete Project</button>
+  </form>
+  </ul>
+
+  <script>
+  const span = document.querySelector(".project_title");
+  span.innerHTML = span.textContent.replace(
+    /([\u{1F300}-\u{1FAFF}])/gu,
+    '<span class="emoji">$1</span>'
+  );
+
+  /* make these global so functions defined outside DOMContentLoaded can use them */
+  window.projectId = {{ project[0]|tojson }};
+  window.userId = {{ User_id|tojson }};
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Attach listeners to data-* buttons
+    document.querySelectorAll('.resource-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const type = btn.dataset.type;
+        const chapter_idx = btn.dataset.chapter;
+        const sub_idx = btn.dataset.sub;
+        const title = btn.dataset.title;
+        const description = btn.dataset.description;
+        console.log("Button clicked", {type, chapter_idx, sub_idx, title});
+        handleResource(type, chapter_idx, sub_idx, title, description, btn);
+      });
+    });
+
+    // modal close handlers
+    const closeModal = document.getElementById('closeModal');
+    const closeNotes = document.getElementById('closeNotes');
+    if (closeModal) closeModal.addEventListener('click', () => {
+      document.getElementById('videoFrame').src = '';
+      document.getElementById('videoModal').style.display = 'none';
+    });
+    if (closeNotes) closeNotes.addEventListener('click', () => {
+      document.getElementById('notesFrame').src = '';
+      document.getElementById('notesModal').style.display = 'none';
+    });
+    window.addEventListener('click', (ev) => {
+      const vmodal = document.getElementById('videoModal');
+      const nmodal = document.getElementById('notesModal');
+      if (ev.target === vmodal) { document.getElementById('videoFrame').src=''; vmodal.style.display='none'; }
+      if (ev.target === nmodal) { document.getElementById('notesFrame').src=''; nmodal.style.display='none'; }
     });
   });
 
-  // modal close handlers
-  const closeModal = document.getElementById('closeModal');
-  const closeNotes = document.getElementById('closeNotes');
-  if (closeModal) closeModal.addEventListener('click', () => {
-    document.getElementById('videoFrame').src = '';
-    document.getElementById('videoModal').style.display = 'none';
-  });
-  if (closeNotes) closeNotes.addEventListener('click', () => {
-    document.getElementById('notesFrame').src = '';
-    document.getElementById('notesModal').style.display = 'none';
-  });
-  window.addEventListener('click', (ev) => {
-    const vmodal = document.getElementById('videoModal');
-    const nmodal = document.getElementById('notesModal');
-    if (ev.target === vmodal) { document.getElementById('videoFrame').src=''; vmodal.style.display='none'; }
-    if (ev.target === nmodal) { document.getElementById('notesFrame').src=''; nmodal.style.display='none'; }
-  });
-});
-
-/* open viewers */
-function openResourceViewer(type, url) {
-  if (type === 'video') {
-    const modal = document.getElementById('videoModal');
-    const iframe = document.getElementById('videoFrame');
-    iframe.src = url;
-    modal.style.display = 'block';
-  } else {
-    const modal = document.getElementById('notesModal');
-    const frame = document.getElementById('notesFrame');
-    frame.src = url;
-    modal.style.display = 'block';
+  /* open viewers */
+  function openResourceViewer(type, url) {
+    if (type === 'video') {
+      const modal = document.getElementById('videoModal');
+      const iframe = document.getElementById('videoFrame');
+      iframe.src = url;
+      modal.style.display = 'block';
+    } else {
+      const modal = document.getElementById('notesModal');
+      const frame = document.getElementById('notesFrame');
+      frame.src = url;
+      modal.style.display = 'block';
+    }
   }
-}
 
-/* handleResource */
-async function handleResource(type, chapter_idx, sub_idx, title, description, btn) {
-  console.log("handleResource start", {type, chapter_idx, sub_idx, title});
-  btn.disabled = true;
-  const origText = btn.innerText;
-  btn.innerText = "Loading…";
+  /* handleResource */
+  async function handleResource(type, chapter_idx, sub_idx, title, description, btn) {
+    console.log("handleResource start", {type, chapter_idx, sub_idx, title});
+    btn.disabled = true;
+    const origText = btn.src;
+    btn.src = "../static/img/loading.png"
 
-  try {
-    // Status check
-    const statusUrl = `/api/projects/${window.projectId}/resource/status?type=${encodeURIComponent(type)}&chapter_idx=${encodeURIComponent(chapter_idx)}&sub_idx=${encodeURIComponent(sub_idx)}`;
-    console.log("fetch status", statusUrl);
-    const statusResp = await fetch(statusUrl, { credentials: 'same-origin' });
-    if (!statusResp.ok) {
-      const txt = await statusResp.text();
-      console.error("Status API error", statusResp.status, txt);
-      alert("Status check failed (see console).");
-      return;
+    try {
+      // Status check
+      const statusUrl = `/api/projects/${window.projectId}/resource/status?type=${encodeURIComponent(type)}&chapter_idx=${encodeURIComponent(chapter_idx)}&sub_idx=${encodeURIComponent(sub_idx)}`;
+      console.log("fetch status", statusUrl);
+      const statusResp = await fetch(statusUrl, { credentials: 'same-origin' });
+      if (!statusResp.ok) {
+        const txt = await statusResp.text();
+        console.error("Status API error", statusResp.status, txt);
+        alert("Status check failed (see console).");
+        return;
+      }
+      const status = await statusResp.json();
+      console.log("status result", status);
+
+      if (status.exists) {
+        openResourceViewer(type, status.url);
+        return;
+      }
+
+      // Create
+      const createUrl = `/api/projects/${window.projectId}/resource/create`;
+      console.log("creating via", createUrl);
+      const createResp = await fetch(createUrl, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, chapter_idx, sub_idx, title, description })
+      });
+
+      const createJson = await createResp.json().catch(e => { 
+        console.error("failed to parse create response json", e);
+        return null;
+      });
+      if (!createResp.ok) {
+        console.error("Create failed", createResp.status, createJson);
+        alert("Create failed (see console).");
+        return;
+      }
+      console.log("create success", createJson);
+      openResourceViewer(type, createJson.url);
+
+    } catch (err) {
+      console.error("handleResource exception", err);
+      alert("An error occurred. See console for details.");
+    } finally {
+      btn.disabled = false;
+      btn.src = origText;
     }
-    const status = await statusResp.json();
-    console.log("status result", status);
-
-    if (status.exists) {
-      openResourceViewer(type, status.url);
-      return;
-    }
-
-    // Create
-    const createUrl = `/api/projects/${window.projectId}/resource/create`;
-    console.log("creating via", createUrl);
-    const createResp = await fetch(createUrl, {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type, chapter_idx, sub_idx, title, description })
-    });
-
-    const createJson = await createResp.json().catch(e => { 
-      console.error("failed to parse create response json", e);
-      return null;
-    });
-    if (!createResp.ok) {
-      console.error("Create failed", createResp.status, createJson);
-      alert("Create failed (see console).");
-      return;
-    }
-    console.log("create success", createJson);
-    openResourceViewer(type, createJson.url);
-
-  } catch (err) {
-    console.error("handleResource exception", err);
-    alert("An error occurred. See console for details.");
-  } finally {
-    btn.disabled = false;
-    btn.innerText = origText;
   }
-}
-</script>
+  </script>
+</body>
