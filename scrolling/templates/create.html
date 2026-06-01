@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Videos</title>
+    <style>
+        * { box-sizing: border-box; }
+        
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            background-color: #000; color: white;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+
+        .create-container {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .generate-btn {
+            background-color: #ea4335; /* A nice red/pink color */
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            margin-top: 20px;
+        }
+
+        .generate-btn:active { transform: scale(0.95); }
+        .generate-btn:disabled { background-color: #555; cursor: not-allowed; }
+
+        #status-message {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #aaa;
+            max-width: 300px;
+            line-height: 1.5;
+        }
+
+        /* --- BOTTOM NAV BAR --- */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0;
+            width: 100vw; height: 60px;
+            background-color: #000; border-top: 1px solid #333;
+            display: flex; justify-content: space-around; align-items: center;
+        }
+
+        .nav-item {
+            color: #888; text-decoration: none;
+            font-size: 14px; font-weight: bold;
+            display: flex; flex-direction: column; align-items: center;
+            transition: color 0.2s;
+        }
+        .nav-item.active { color: #fff; }
+        .nav-item:hover { color: #fff; }
+    </style>
+</head>
+<body>
+
+    <div class="create-container">
+        <h1>Create New Videos</h1>
+        <p>Generate a new batch of AI videos and quizzes.</p>
+        
+        <button class="generate-btn" id="generateBtn">Start Generation</button>
+        <div id="status-message"></div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="/" class="nav-item">Home</a>
+        <a href="/create" class="nav-item active">+ Create</a>
+        <a href="#" class="nav-item">Profile</a>
+    </div>
+
+    <script>
+        document.getElementById('generateBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('generateBtn');
+            const statusBox = document.getElementById('status-message');
+            
+            // Disable button to prevent spam clicking
+            btn.disabled = true;
+            btn.innerText = "Processing...";
+            statusBox.innerText = "Requesting server to start generation...";
+
+            try {
+                const response = await fetch('/api/generate', { method: 'POST' });
+                const data = await response.json();
+                
+                if (response.ok) {
+                    statusBox.innerHTML = `<span style="color: #4CAF50;">Success!</span> ${data.message} This will take up to 20 minutes. You can safely return to the home feed while you wait.`;
+                } else {
+                    statusBox.innerText = "Error starting generation.";
+                    btn.disabled = false;
+                    btn.innerText = "Start Generation";
+                }
+            } catch (error) {
+                statusBox.innerText = "Network error. Please try again.";
+                btn.disabled = false;
+                btn.innerText = "Start Generation";
+            }
+        });
+    </script>
+</body>
+</html>
