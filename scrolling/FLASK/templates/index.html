@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Feed</title>
+    <style>
+        * { box-sizing: border-box; }
+        
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            background-color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow: hidden;
+        }
+
+        /* Adjusted to leave 60px at the bottom for the nav bar */
+        .feed-container {
+            height: calc(100vh - 60px); 
+            width: 100vw;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scrollbar-width: none;
+        }
+        .feed-container::-webkit-scrollbar { display: none; }
+
+        .video-wrapper {
+            height: calc(100vh - 60px); 
+            width: 100%; position: relative;
+            scroll-snap-align: start;
+            display: flex; justify-content: center; align-items: center;
+            background-color: #ffffff;
+        }
+
+        video {
+            height: 100%; width: 100%; max-width: 600px;
+            object-fit: cover; cursor: pointer;
+        }
+
+        #unmute-overlay {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(255,255,255,0.9); color: black;
+            padding: 10px 20px; border-radius: 20px; font-weight: bold;
+            z-index: 100; cursor: pointer; transition: opacity 0.3s;
+        }
+
+        .sidebar {
+            position: absolute; right: 15px; bottom: 80px;
+            display: flex; flex-direction: column; gap: 20px;
+            align-items: center; z-index: 10;
+        }
+
+        .sidebar img {
+            width: 45px; height: 45px;
+            border-radius: 50%; object-fit: cover;
+            cursor: pointer; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.5));
+            transition: transform 0.1s;
+        }
+        .sidebar img:active { transform: scale(0.9); }
+        .sidebar .profile-pic { width: 50px; height: 50px; border: 2px solid white; margin-bottom: 15px; }
+
+        .bottom-info {
+            position: absolute; left: 15px; bottom: 20px;
+            color: white; z-index: 10; width: calc(100% - 90px);
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        }
+
+        /* --- NEW BOTTOM NAV BAR --- */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0;
+            width: 100vw; height: 60px;
+            background-color: #000;
+            border-top: 1px solid #333;
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 300;
+        }
+
+        .nav-item {
+            color: #888; text-decoration: none;
+            font-size: 14px; font-weight: bold;
+            display: flex; flex-direction: column; align-items: center;
+            transition: color 0.2s;
+        }
+        .nav-item.active { color: #fff; }
+        .nav-item:hover { color: #fff; }
+
+        /* Quiz Modal Styles (Truncated for brevity, keep your existing ones) */
+        #quiz-modal {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100vw; height: 100vh; background: rgba(0,0,0,0.85);
+            z-index: 400; justify-content: center; align-items: center;
+            flex-direction: column; color: white; padding: 20px;
+        }
+        .quiz-container { background: #222; padding: 25px; border-radius: 15px; width: 100%; max-width: 500px; text-align: center; }
+        .quiz-option { display: block; width: 100%; padding: 12px; margin: 10px 0; background: #444; border: none; border-radius: 8px; color: white; font-size: 16px; cursor: pointer; }
+        .quiz-option.correct { background: #28a745 !important; }
+        .quiz-option.wrong { background: #dc3545 !important; }
+        .close-btn { margin-top: 20px; padding: 10px 20px; background: transparent; border: 1px solid white; color: white; border-radius: 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div id="unmute-overlay">Tap anywhere to unmute</div>
+
+    <div id="quiz-modal">
+        <div class="quiz-container">
+            <h2 id="quiz-title">Loading...</h2>
+            <h3 id="quiz-question"></h3>
+            <div id="quiz-options"></div>
+            <button class="close-btn" onclick="closeQuiz()">Close Quiz</button>
+        </div>
+    </div>
+
+    <div class="feed-container">
+        {% for video in videos %}
+        <div class="video-wrapper" data-filename="{{ video }}">
+            <video src="/videos/{{ video }}" loop muted playsinline></video>
+            <div class="sidebar">
+                <img src="/static/profile.png" class="profile-pic" alt="Profile">
+                <img src="/static/like.png" alt="Like">
+                <img src="/static/comment.png" alt="Comment">
+                <img src="/static/quiz.png" alt="Quiz" class="quiz-btn">
+            </div>
+            <div class="bottom-info">
+                <h3>@filename</h3>
+                <p>{{ video }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="bottom-nav">
+        <a href="/" class="nav-item active">Home</a>
+        <a href="/create" class="nav-item">+ Create</a>
+        <a href="#" class="nav-item">Profile</a>
+    </div>
+</body>
+
+<script>
+    let isGlobalMuted = true;
+    let currentQuizData = null;
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    // Centralized function to keep all videos and the banner in sync
+    function updateMuteStatus() {
+        const videos = document.querySelectorAll('video');
+        const unmuteOverlay = document.getElementById('unmute-overlay');
+        
+        // Force every video to respect the global mute preference
+        videos.forEach(v => {
+            v.muted = isGlobalMuted;
+        });
+
+        // Animate and toggle the overlay banner
+        if (isGlobalMuted) {
+            unmuteOverlay.style.display = 'block';
+            unmuteOverlay.style.opacity = '1';
+        } else {
+            unmuteOverlay.style.opacity = '0';
+            setTimeout(() => {
+                // Double check it hasn't been re-muted during the fadeout animation
+                if (!isGlobalMuted) unmuteOverlay.style.display = 'none';
+            }, 300);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const videos = document.querySelectorAll('video');
+        const quizButtons = document.querySelectorAll('.quiz-btn');
+
+        // 1. Initial Interaction Handler (Clicking anywhere turns on sound)
+        const initialUserInteraction = () => {
+            if (isGlobalMuted) {
+                isGlobalMuted = false;
+                updateMuteStatus();
+            }
+            // Remove this specific document listener once the ice is broken
+            document.removeEventListener('click', initialUserInteraction);
+        };
+        document.addEventListener('click', initialUserInteraction);
+
+        // 2. Individual Video Click Handler (Toggles sound on tap)
+        videos.forEach(video => {
+            video.addEventListener('click', (e) => {
+                // Stop event from bubbling up to document and resetting unpredictably
+                e.stopPropagation(); 
+                isGlobalMuted = !isGlobalMuted;
+                updateMuteStatus();
+            });
+        });
+
+        // 3. Intersection Observer (Handles scrolling and keeps sound state synced)
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const video = entry.target;
+                if (entry.isIntersecting) {
+                    // CRITICAL: Push the global mute state to the newly scrolled video
+                    video.muted = isGlobalMuted;
+                    
+                    video.play().catch(err => {
+                        // Browser safety net: if autoplay fails because of audio restrictions, 
+                        // force it to mute, play anyway, and show the banner.
+                        console.log("Autoplay blocked unmuted audio. Forcing mute.");
+                        isGlobalMuted = true;
+                        video.muted = true;
+                        updateMuteStatus();
+                        video.play();
+                    });
+                } else {
+                    video.pause();
+                    video.currentTime = 0; 
+                }
+            });
+        }, { threshold: 0.6 });
+
+        videos.forEach(video => observer.observe(video));
+
+        // 4. Quiz Button Event Listeners
+        quizButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevents the video from muting/unmuting when clicking the quiz icon
+                const wrapper = btn.closest('.video-wrapper');
+                const filename = wrapper.getAttribute('data-filename');
+                openQuiz(filename);
+            });
+        });
+    });
+
+    // --- Quiz Logic Functions ---
+    async function openQuiz(videoFilename) {
+        const modal = document.getElementById('quiz-modal');
+        const titleEl = document.getElementById('quiz-title');
+        const questionEl = document.getElementById('quiz-question');
+        const optionsEl = document.getElementById('quiz-options');
+        
+        modal.style.display = 'flex';
+        titleEl.innerText = "Loading Quiz...";
+        questionEl.innerText = "";
+        optionsEl.innerHTML = "";
+
+        try {
+            const response = await fetch(`/quiz/${videoFilename}`);
+            if (!response.ok) throw new Error("No quiz found");
+            
+            currentQuizData = await response.json();
+            currentQuestionIndex = 0;
+            score = 0;
+            titleEl.innerText = currentQuizData.quiz_title;
+            
+            renderQuestion();
+        } catch (error) {
+            titleEl.innerText = "No quiz available for this video.";
+        }
+    }
+
+    function renderQuestion() {
+        const questionData = currentQuizData.questions[currentQuestionIndex];
+        document.getElementById('quiz-question').innerText = questionData.question;
+        
+        const optionsEl = document.getElementById('quiz-options');
+        optionsEl.innerHTML = ""; 
+
+        questionData.options.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'quiz-option';
+            btn.innerText = opt;
+            btn.onclick = () => handleAnswer(btn, index, questionData.correct_answer_index);
+            optionsEl.appendChild(btn);
+        });
+    }
+
+    function handleAnswer(btn, selectedIndex, correctIndex) {
+        const allButtons = document.querySelectorAll('.quiz-option');
+        allButtons.forEach(b => b.disabled = true);
+
+        if (selectedIndex === correctIndex) {
+            btn.classList.add('correct');
+            score++;
+        } else {
+            btn.classList.add('wrong');
+            allButtons[correctIndex].classList.add('correct'); 
+        }
+
+        setTimeout(() => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < currentQuizData.questions.length) {
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }, 1500);
+    }
+
+    function showResults() {
+        document.getElementById('quiz-question').innerText = `Quiz finished!`;
+        document.getElementById('quiz-options').innerHTML = `<p style="font-size: 20px;">You scored ${score} out of ${currentQuizData.questions.length}.</p>`;
+    }
+
+    function closeQuiz() {
+        document.getElementById('quiz-modal').style.display = 'none';
+    }
+</script>
+
+</html>
